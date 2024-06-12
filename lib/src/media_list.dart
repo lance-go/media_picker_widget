@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../media_picker_widget.dart';
@@ -13,6 +13,7 @@ class MediaList extends StatefulWidget {
     required this.decoration,
     this.scrollController,
     required this.onMediaTilePressed,
+    this.onTapCamera,
   });
 
   final AssetPathEntity album;
@@ -20,6 +21,7 @@ class MediaList extends StatefulWidget {
   final MediaCount? mediaCount;
   final PickerDecoration decoration;
   final ScrollController? scrollController;
+  final Function()? onTapCamera;
   final Function(MediaViewModel media, List<MediaViewModel> selectedMedias)
       onMediaTilePressed;
 
@@ -61,23 +63,36 @@ class _MediaListState extends State<MediaList> {
         return true;
       },
       child: GridView.builder(
-        controller: widget.scrollController,
-        itemCount: _mediaList.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: widget.decoration.columnCount,
-        ),
-        itemBuilder: (_, index) => MediaTile(
-          media: _mediaList[index],
-          onThumbnailLoad: (thumb) {
-            _mediaList[index].thumbnail = thumb;
-            setState(() {});
-          },
-          onSelected: _onMediaTileSelected,
-          isSelected: _isPreviouslySelected(_mediaList[index]),
-          selectionIndex: _getSelectionIndex(_mediaList[index]),
-          decoration: widget.decoration,
-        ),
-      ),
+          padding: EdgeInsets.zero,
+          controller: widget.scrollController,
+          itemCount: widget.onTapCamera == null
+              ? _mediaList.length
+              : _mediaList.length + 1,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: widget.decoration.columnCount,
+          ),
+          itemBuilder: (_, index) {
+            if (index == 0 && widget.onTapCamera != null)
+              return GestureDetector(
+                onTap: widget.onTapCamera,
+                child: Icon(
+                  CupertinoIcons.camera_circle,
+                  size: 60,
+                ),
+              );
+            final indexMedia = widget.onTapCamera == null ? index : index - 1;
+            return MediaTile(
+              media: _mediaList[indexMedia],
+              onThumbnailLoad: (thumb) {
+                _mediaList[indexMedia].thumbnail = thumb;
+                setState(() {});
+              },
+              onSelected: _onMediaTileSelected,
+              isSelected: _isPreviouslySelected(_mediaList[indexMedia]),
+              selectionIndex: _getSelectionIndex(_mediaList[indexMedia]),
+              decoration: widget.decoration,
+            );
+          }),
     );
   }
 

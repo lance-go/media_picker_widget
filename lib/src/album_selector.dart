@@ -39,6 +39,7 @@ class AlbumSelector extends StatelessWidget {
         maxHeight: constrains.maxHeight,
         panelBuilder: (sc) {
           return ListView.builder(
+            padding: EdgeInsets.zero,
             controller: sc,
             itemBuilder: (_, index) => albumTiles[index],
             itemCount: albumTiles.length,
